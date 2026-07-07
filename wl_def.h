@@ -291,6 +291,15 @@ enum objflags
     // next free bit is   0x00001000
 };
 
+//
+// Game Flags
+//
+
+enum gmflags
+{
+     GM_FLATS          = 0x01,
+     GM_SHADE          = 0x02,
+};
 
 //
 // sprite constants
@@ -923,6 +932,7 @@ typedef struct
                 secrettotal,treasuretotal,killtotal;
     int32_t     TimeCount;
     int32_t     killx,killy;
+	byte		gameflags;
     boolean     victoryflag;            // set during victory animations
 } gametype;
 
