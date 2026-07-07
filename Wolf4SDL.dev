@@ -1,31 +1,31 @@
 [Project]
 FileName=Wolf4SDL.dev
-Name=Wolf4SDL
-UnitCount=55
+Name=UziWolf
+UnitCount=56
 Type=0
 Ver=1
 ObjFiles=
-Includes=C:\Dev-Cpp\include\SDL;C:\Dev-Cpp\include\SDL_Mixer
-Libs=C:\Dev-Cpp\lib\SDL;C:\Dev-Cpp\lib\SDL_Mixer
+Includes=C:\Dev-Cpp\include\SDL2;C:\Dev-Cpp\include\SDL2_Mixer
+Libs=C:\Dev-Cpp\lib\SDL2;C:\Dev-Cpp\lib\SDL2_Mixer
 PrivateResource=Wolf4SDL_private.rc
 ResourceIncludes=
 MakeIncludes=
 Compiler=-Dmain=SDL_main_@@_
 CppCompiler=
-Linker=-lmingw32 -lSDL -lSDL_mixer_@@_
+Linker=-lmingw32 -lSDL2 -lSDL2_mixer_@@_
 IsCpp=0
 Icon=Wolf4SDL.ico
 ExeOutput=obj
-ObjectOutput=obj
-OverrideOutput=0
-OverrideOutputName=Wolf4SDL.exe
+ObjectOutput=out
+OverrideOutput=1
+OverrideOutputName=UziWolf.exe
 HostApplication=
 Folders=
-CommandLine=--goobers --windowed
+CommandLine=--windowed
 UseCustomMakefile=0
 CustomMakefile=
 IncludeVersionInfo=1
-SupportXPThemes=0
+SupportXPThemes=1
 CompilerSet=0
 CompilerSettings=0000000000000001000000
 
@@ -578,7 +578,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [VersionInfo]
-Major=2
+Major=1
 Minor=0
 Release=0
 Build=0
@@ -609,6 +609,16 @@ BuildCmd=
 FileName=sdl_wrap.c
 CompileCpp=0
 Folder=Wolf4SDL
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit56]
+FileName=uzi_defs.h
+CompileCpp=0
+Folder=
 Compile=1
 Link=1
 Priority=1000
