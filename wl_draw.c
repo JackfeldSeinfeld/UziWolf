@@ -299,6 +299,7 @@ void ScalePost (void)
 {
     int ywcount, yoffs, yw, yd, yendoffs;
     byte col;
+    byte *curshades;
 
 #ifdef USE_SKYWALLPARALLAX
     if (tilehit == 16)
@@ -308,9 +309,9 @@ void ScalePost (void)
     }
 #endif
 
-#ifdef USE_SHADING
-    byte *curshades = shadetable[GetShade(wallheight[postx])];
-#endif
+    if (gamestate.gameflags & GM_SHADE)
+       curshades = shadetable[GetShade(wallheight[postx])];
+    else curshades = shadetable[0];
 
     ywcount = yd = wallheight[postx] >> 3;
     if(yd <= 0) yd = 100;
@@ -334,11 +335,9 @@ void ScalePost (void)
     }
     if(yw < 0) return;
 
-#ifdef USE_SHADING
+
     col = curshades[postsource[yw]];
-#else
-    col = postsource[yw];
-#endif
+
     yendoffs = yendoffs * bufferPitch + postx;
     while(yoffs <= yendoffs)
     {
@@ -353,11 +352,9 @@ void ScalePost (void)
             }
             while(ywcount <= 0);
             if(yw < 0) break;
-#ifdef USE_SHADING
-            col = curshades[postsource[yw]];
-#else
-            col = postsource[yw];
-#endif
+            if (gamestate.gameflags & GM_SHADE)
+               col = curshades[postsource[yw]];
+            else col = postsource[yw];
         }
         yendoffs -= bufferPitch;
     }
@@ -605,6 +602,24 @@ byte vgaCeiling[]=
 #endif
 };
 
+
+
+byte vgaFloor[]=
+{
+#ifndef SPEAR
+ 0x19,0xDA,0x19,0x19,0x19,0x19,0x19,0x19,0x19,0xBD,
+ 0x19,0x19,0x19,0x19,0x19,0x19,0x19,0x19,0x19,0x19,
+ 0x19,0x19,0x19,0x19,0x19,0x19,0x19,0x19,0x19,0x19,
+
+ 0x19,0x19,0x19,0x19,0x19,0x19,0x19,0x19,0xDA,0x19,
+ 0x19,0x19,0x19,0x19,0x19,0x19,0x19,0x19,0x19,0x19,
+ 0x19,0x19,0x19,0x19,0x19,0x19,0x19,0x19,0x19,0x19
+#else
+ 0x19,0x19,0x19,0x19,0x19,0x19,0x19,0x19,0x19,0x19,
+ 0x19,0x19,0x19,0x19,0x19,0x19,0x19,0x19,0x19,0x19,0x19
+#endif
+};
+
 /*
 =====================
 =
@@ -616,19 +631,17 @@ byte vgaCeiling[]=
 void VGAClearScreen (void)
 {
     byte ceiling=vgaCeiling[gamestate.episode*10+gamestate.mapon];
+    byte floor=vgaFloor[gamestate.episode*10+gamestate.mapon];
 
     int y;
     byte *dest = vbuf;
-#ifdef USE_SHADING
-    for(y = 0; y < viewheight / 2; y++, dest += bufferPitch)
-        memset(dest, shadetable[GetShade((viewheight / 2 - y) << 3)][ceiling], viewwidth);
-    for(; y < viewheight; y++, dest += bufferPitch)
-        memset(dest, shadetable[GetShade((y - viewheight / 2) << 3)][0x19], viewwidth);
-#else
     for(y = 0; y < viewheight / 2; y++, dest += bufferPitch)
         memset(dest, ceiling, viewwidth);
     for(; y < viewheight; y++, dest += bufferPitch)
+#ifndef JABSWAP
         memset(dest, 0x19, viewwidth);
+#else
+        memset(dest, floor, viewwidth);
 #endif
 }
 
@@ -1506,9 +1519,7 @@ void ThreeDRefresh (void)
         DrawCloudPlanes ();
 #endif
 
-#ifdef USE_FLOORCEILINGTEX
-    DrawPlanes ();
-#endif
+    if (gamestate.gameflags & GM_FLATS) DrawPlanes ();
 
 //
 // draw all the scaled images

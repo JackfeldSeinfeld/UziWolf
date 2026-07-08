@@ -68,11 +68,9 @@ void ScaleLine (int16_t x, int16_t toppix, fixed fracstep, byte *linesrc, byte *
             if (endpix > viewheight)
                 endpix = viewheight;            // clip lower boundary
 
-#ifdef USE_SHADING
             if (curshades)
                 col = curshades[*src];
             else
-#endif
                 col = *src;
 
             dest = vbuf + ylookup[startpix] + x;
@@ -118,12 +116,10 @@ void ScaleShape (int xcenter, int shapenum, int height, uint32_t flags)
     linesrc = PM_GetSpritePage(shapenum);
     shape = (compshape_t *)linesrc;
 
-#ifdef USE_SHADING
     if (flags & FL_FULLBRIGHT)
         curshades = shadetable[0];
-    else
+    else if (gamestate.gameflags & GM_SHADE)
         curshades = shadetable[GetShade(height)];
-#endif
 
     fracstep = FixedDiv(scale,TEXTURESIZE/2);
     frac = shape->leftpix * fracstep;
@@ -314,12 +310,11 @@ void Scale3DShape (visobj_t *sprite, int x1, int x2, fixed ny1, fixed ny2, fixed
 
             if (wallheight[slinex] < (height >> 12))
             {
-#ifdef USE_SHADING
-                if (sprite->flags & FL_FULLBRIGHT)
+
+                if (sprite->flags & FL_FULLBRIGHT && gamestate.gameflags & ~GM_SHADE)
                     curshades = shadetable[0];
                 else
                     curshades = shadetable[GetShade(scale1 << 3)];
-#endif
                 fracstep = FixedDiv(scale1,TEXTURESIZE/2);
                 toppix = centery - scale1;
 

@@ -127,7 +127,7 @@ void NoShading()
 void InitLevelShadeTable()
 {
     shadedef_t *shadeDef = &shadeDefs[GetShadeDefID()];
-    if(shadeDef->fogStrength == LSHADE_NOSHADING)
+    if(gamestate.gameflags & ~GM_SHADE)
         NoShading();
     else
         GenerateShadeTable(shadeDef->destRed, shadeDef->destGreen, shadeDef->destBlue, gamepal, shadeDef->fogStrength);

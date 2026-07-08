@@ -634,9 +634,8 @@ void CheckKeys (void)
         ClearMemory ();
         ClearSplitVWB ();
 
-        Message ("Commander Keen is also\n"
-                 "available from Apogee, but\n"
-                 "then, you already know\n" "that - right, Cheatmeister?!");
+        Message ("If Apogee can't do it.\n"
+                 "Then i shalt make it MYSELF!!");
 
         IN_ClearKeysDown ();
         IN_Ack ();
@@ -1261,9 +1260,7 @@ void PlayLoop (void)
         InitSky();
 #endif
 
-#ifdef USE_SHADING
     InitLevelShadeTable();
-#endif
 
     playstate = ex_stillplaying;
     lasttimecount = GetTimeCount();

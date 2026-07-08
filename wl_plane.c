@@ -34,28 +34,28 @@ void GetFlatTextures (void)
 =
 ===================
 */
-#ifdef USE_MULTIFLATS
+
 void DrawSpan (int x1, int x2, int height)
 {
-    int       tilex,tiley,lasttilex,lasttiley;
-    byte      *dest;
-    byte      *shade;
-    int       texture,spot;
-    uint32_t  rowofs;
-    int       ceilingpage,floorpage,lastceilingpage,lastfloorpage;
-    int       count,prestep;
-    fixed     basedist;
-    fixed     xfrac,yfrac;
-    fixed     xstep,ystep;
+    int      tilex,tiley;
+    byte     *dest;
+    byte     *shade;
+    int      texture,spot;
+    uint32_t rowofs;
+    int      count,prestep;
+    int      xpix,ypix,spanlength;
+    fixed    basedist,absstep;
+    fixed    xpartial,ypartial;
+    fixed    xfrac,yfrac;
+    fixed    xstep,ystep;
 
     count = x2 - x1;
 
     if (!count)
         return;                                                 // nothing to draw
 
-#ifdef USE_SHADING
+	if (gamestate.gameflags & GM_SHADE)
     shade = shadetable[GetShade(height << 3)];
-#endif
     dest = vbuf + ylookup[centery - 1 - height] + x1;
     rowofs = ylookup[(height << 1) + 1];                        // toprow to bottomrow delta
 
@@ -68,152 +68,103 @@ void DrawSpan (int x1, int x2, int height)
     xfrac = (viewx + FixedMul(basedist,viewcos)) - (xstep * prestep);
     yfrac = (viewy - FixedMul(basedist,viewsin)) - (ystep * prestep);
 
+    xpix = ypix = 0x7fff;
+
 //
 // draw two spans simultaneously
 //
-    lastceilingpage = lastfloorpage = -1;
-    lasttilex = lasttiley = 0;
-
-    //
-    // Beware - This loop is SLOW, and WILL cause framedrops on slower machines and/or on higher resolutions.
-    // I can't stress it enough: this is one of the worst loops in history! No amount of optimisation will
-    // change that! This loop SUCKS!
-    //
-    // Someday flats rendering will be re-written, but until then, YOU HAVE BEEN WARNED.
-    //
-    while (count--)
+    while (count > 0)
     {
         //
         // get tile coords of texture
         //
-        tilex = (xfrac >> TILESHIFT) & (mapwidth - 1);
-        tiley = (yfrac >> TILESHIFT) & (mapheight - 1);
+        tilex = xfrac >> TILESHIFT;
+        tiley = yfrac >> TILESHIFT;
 
         //
-        // get floor & ceiling textures if it's a new tile
+        // get floor & ceiling textures
         //
-        if (lasttilex != tilex || lasttiley != tiley)
+        spot = MAPSPOT(tilex,tiley,2);
+
+        ceilingsource = PM_GetPage(spot >> 8 );
+        floorsource = PM_GetPage(spot & 0xff);
+
+        if (xstep)
         {
-            lasttilex = tilex;
-            lasttiley = tiley;
-            spot = MAPSPOT(tilex,tiley,2);
+            absstep = xstep;
+            xpartial = xfrac & (TILEGLOBAL - 1);
 
-            if (spot)
+            if (xstep > 0)
+                xpartial = (xpartial ^ (TILEGLOBAL - 1)) + 1;
+            else
+                absstep = -absstep;
+
+            if (xpartial <= absstep)
+                xpix = 1;
+            else
             {
-                ceilingpage = spot >> 8;
-                floorpage = spot & 0xff;
+                xpix = xpartial / absstep;
+
+                if (xpartial % absstep)
+                    xpix++;
             }
         }
 
-        if (spot)
+        if (ystep)
         {
-            texture = ((xfrac >> FIXED2TEXSHIFT) & TEXTUREMASK) + ((yfrac >> (FIXED2TEXSHIFT + TEXTURESHIFT)) & (TEXTURESIZE - 1));
+            absstep = ystep;
+            ypartial = yfrac & (TILEGLOBAL - 1);
+
+            if (ystep > 0)
+                ypartial = (ypartial ^ (TILEGLOBAL - 1)) + 1;
+            else
+                absstep = -absstep;
+
+            if (ypartial <= absstep)
+                ypix = 1;
+            else
+            {
+                ypix = ypartial / absstep;
+
+                if (ypartial % absstep)
+                    ypix++;
+            }
+        }
+
+        spanlength = (xpix < ypix) ? xpix : ypix;
+
+        if (count < spanlength)
+        {
+            spanlength = count;
+            count = 0;
+        }
+        else
+            count -= spanlength;
+
+        while (spanlength--)
+        {
+            texture = ((xfrac >> FIXED2TEXSHIFT) & TEXTUREMASK) + ((yfrac >> (FRACBITS - TEXTURESHIFT)) & (TEXTURESIZE - 1));
 
             //
             // write ceiling pixel
             //
-            if (ceilingpage)
-            {
-                if (lastceilingpage != ceilingpage)
-                {
-                    lastceilingpage = ceilingpage;
-                    ceilingsource = PM_GetPage(ceilingpage);
-                }
-#ifdef USE_SHADING
-                *dest = shade[ceilingsource[texture]];
-#else
-                *dest = ceilingsource[texture];
-#endif
-            }
 
+            if (gamestate.gameflags & GM_SHADE) *dest = shade[ceilingsource[texture]];
+            else *dest = ceilingsource[texture];
             //
             // write floor pixel
             //
-            if (floorpage)
-            {
-                if (lastfloorpage != floorpage)
-                {
-                    lastfloorpage = floorpage;
-                    floorsource = PM_GetPage(floorpage);
-                }
-#ifdef USE_SHADING
-                dest[rowofs] = shade[floorsource[texture]];
-#else
-                dest[rowofs] = floorsource[texture];
-#endif
-            }
+
+            if (gamestate.gameflags & GM_SHADE)  dest[rowofs] = shade[floorsource[texture]];
+            else dest[rowofs] = floorsource[texture];
+
+            dest++;
+
+            xfrac += xstep;
+            yfrac += ystep;
         }
-
-        dest++;
-
-        xfrac += xstep;
-        yfrac += ystep;
     }
 }
-
-#else
-
-/*
-===================
-=
-= DrawSpan
-=
-= Height ranges from 0 (infinity) to [centery] (nearest)
-=
-===================
-*/
-
-void DrawSpan (int x1, int x2, int height)
-{
-    byte     *dest;
-    byte     *shade;
-    int      texture;
-    uint32_t rowofs;
-    int      count,prestep;
-    fixed    basedist;
-    fixed    xfrac,yfrac;
-    fixed    xstep,ystep;
-
-    count = x2 - x1;
-
-    if (!count)
-        return;                                         // nothing to draw
-
-#ifdef USE_SHADING
-    shade = shadetable[GetShade(height << 3)];
-#endif
-    dest = vbuf + ylookup[centery - 1 - height] + x1;
-    rowofs = ylookup[(height << 1) + 1];                // toprow to bottomrow delta
-
-    prestep = centerx - x1 + 1;
-    basedist = FixedDiv(scale,height + 1) >> 1;         // distance to row projection
-
-    xstep = (viewsin >> 1) / (height + 1);
-    ystep = (viewcos >> 1) / (height + 1);
-
-    xfrac = (viewx + FixedMul(basedist,viewcos)) - (xstep * prestep);
-    yfrac = (viewy - FixedMul(basedist,viewsin)) - (ystep * prestep);
-
-//
-// draw two spans simultaneously
-//
-	while (count--)
-	{
-		texture = ((xfrac >> FIXED2TEXSHIFT) & TEXTUREMASK) + ((yfrac >> (FIXED2TEXSHIFT + TEXTURESHIFT)) & (TEXTURESIZE - 1));
-
-#ifdef USE_SHADING
-        *dest = shade[ceilingsource[texture]];
-        dest[rowofs] = shade[floorsource[texture]];
-#else
-        *dest = ceilingsource[texture];
-        dest[rowofs] = floorsource[texture];
-#endif
-		dest++;
-		xfrac += xstep;
-		yfrac += ystep;
-	}
-}
-#endif
 
 /*
 ===================
