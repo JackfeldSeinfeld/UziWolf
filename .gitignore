@@ -79,3 +79,4 @@ Makefile.win
 ##############
 /.vscode
 /build
+*.dev
