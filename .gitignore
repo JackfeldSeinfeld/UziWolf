@@ -1,5 +1,7 @@
 # Compiled source #
 ###################
+*.dev
+*.manifest
 *.com
 *.class
 *.dll
@@ -79,4 +81,4 @@ Makefile.win
 ##############
 /.vscode
 /build
-*.dev
+
