@@ -1295,6 +1295,11 @@ void PlayLoop (void)
 
         ThreeDRefresh ();
 
+#ifdef REWARDS
+        CheckTreasure();
+#endif
+
+
         //
         // MAKE FUNNY FACE IF BJ DOESN'T MOVE FOR AWHILE
         //

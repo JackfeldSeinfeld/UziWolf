@@ -1094,6 +1094,10 @@ typedef struct
     short       episode,secretcount,treasurecount,killcount,
                 secrettotal,treasuretotal,killtotal;
 
+#ifdef REWARDS
+    boolean     GotAllTres;
+#endif
+
     int32_t     TimeCount;
     int32_t     killx,killy;
     byte        gameflags;
@@ -1190,6 +1194,10 @@ extern  char        demoname[13];
 extern  int32_t     spearx,speary;
 extern  unsigned    spearangle;
 extern  boolean     spearflag;
+#endif
+
+#ifdef REWARDS
+void CheckTreasure (void);
 #endif
 
 void    SetupGameLevel (void);

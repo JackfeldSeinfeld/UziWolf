@@ -611,6 +611,56 @@ static void ScanInfoPlane(void)
 
 //==========================================================================
 
+#ifdef REWARDS
+
+/*
+==================
+=
+= GetReward
+=
+==================
+*/
+
+void GetReward (byte RewardNum)
+{
+     switch (RewardNum)
+     {
+          default:
+               GiveExtraMan();
+               break;
+     }
+}
+
+/*
+==================
+=
+= CheckTreasure
+=
+==================
+*/
+
+
+void CheckTreasure (void)
+{
+     byte Uzi;
+     Uzi = (US_RndT()>>4);
+     
+     if (gamestate.treasuretotal == 0)
+        return;
+     
+     if (gamestate.treasurecount == gamestate.treasuretotal)
+     {
+           if (gamestate.GotAllTres != true)
+           {
+              SD_PlaySound(YEAHSND);
+              GetReward(Uzi);
+           }
+           gamestate.GotAllTres = true;
+     }
+}
+
+#endif
+
 /*
 ==================
 =

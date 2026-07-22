@@ -35,8 +35,8 @@
 //#define USE_FEATUREFLAGS    // Enables the level feature flags (see bottom of wl_def.h)
 //#define USE_SHADING         // Enables shading support (see wl_shade.c)
 //#define USE_DIR3DSPR        // Enables directional 3d sprites
-//#define USE_FLOORCEILINGTEX // Enables texture-mapped floors and ceilings (see wl_plane.c)
-//#define USE_MULTIFLATS      // Enables floor and ceiling textures stored in the third mapplane
+#define USE_FLOORCEILINGTEX // Enables texture-mapped floors and ceilings (see wl_plane.c)
+#define USE_MULTIFLATS      // Enables floor and ceiling textures stored in the third mapplane
 //#define USE_PARALLAX 16     // Enables parallax sky with 16 textures per sky (see wl_parallax.c)
 //#define USE_COMPOSITEPARALLAX // Enables parallax sky with 16 composite textures per sky (1024x128 pixel texture)
 //#define USE_SKYWALLPARALLAX 16 // Enables parallax sky on walls with 16 repeats of sky texture

@@ -2,9 +2,9 @@
 
 #include "wl_def.h"
 
-#ifdef USE_SHADING
+//#ifdef USE_SHADING
 #include "wl_shade.h"
-#endif
+//#endif
 
 
 /*
